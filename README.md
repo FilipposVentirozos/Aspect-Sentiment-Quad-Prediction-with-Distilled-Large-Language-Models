@@ -8,9 +8,9 @@ This project explores two primary methodologies for Aspect-Based Sentiment Analy
 
 1.  **Chain-of-Thought (CoT) with Agents:** This approach decomposes the ABSA task into a sequence of smaller, more manageable steps. Each step is handled by a specialized "agent" that focuses on a specific element of the quad (aspect, sentiment, or category). The project dynamically permutes the order of these agents to identify the most effective processing chain.
 
-2.  **In-Context Learning (ICL):** This is a few-shot learning approach where the model is provided with a small number of examples of the task within the prompt to guide its predictions.
+2.  **In-Context Learning (ICL):** This is a few-shot learning approach where the model is provided with a some number of examples of the task within the prompt to guide its predictions.
 
-The system is designed to be model-agnostic, supporting various Large Language Models (LLMs) from providers like OpenAI, Google, and Anthropic, as well as local models like Qwen.
+The system is designed to be model-agnostic, supporting various Large Language Models (LLMs) from providers like OpenAI, Google, as well as local models like Qwen.
 
 ## Project Structure
 
@@ -67,7 +67,7 @@ This project leverages the following APIs and libraries for interacting with LLM
 
 *   **Google Vertex AI:** Used for accessing Gemini and other Google models. For more information on how to get started with Vertex AI, please refer to the [Vertex AI documentation](https://cloud.google.com/vertex-ai/docs).
 
-*   **vLLM:** Used for running local models like Qwen. To learn how to set up and use vLLM, please see the [vLLM documentation](https://vllm.ai/).
+*   **vLLM:** Used for running local models like Qwen. To learn how to set up and use vLLM, please see the [vLLM documentation](https://docs.vllm.ai/en/latest/).
 
 ## Running the Experiments
 
