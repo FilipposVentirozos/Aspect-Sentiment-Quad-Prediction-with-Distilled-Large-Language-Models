@@ -7,7 +7,6 @@ import vertexai
 import vertexai.preview.generative_models as generative_models
 from google.api_core import exceptions as google_exceptions
 from openai import OpenAI
-# from vertexai.generative_models import GenerativeModel
 from vertexai.generative_models import GenerativeModel
 from vertexai.generative_models._generative_models import Content, Part
 from anthropic import AnthropicVertex
@@ -28,13 +27,26 @@ prev_model = None
 api_key_params, parameters = None, None
 
 class TimeoutException(Exception):
+    """Custom exception for function timeouts."""
     pass
 
 def timeout_handler(signum, frame):
+    """Handles the timeout signal."""
     raise TimeoutException("Function execution exceeded time limit")
 
 
 def run_with_timeout(func, chat_history, prompt, timeout):
+    """Runs a function with a timeout.
+
+    Args:
+        func (function): The function to run.
+        chat_history (list): The chat history to pass to the function.
+        prompt (str): The prompt to pass to the function.
+        timeout (int): The timeout in seconds.
+
+    Returns:
+        The result of the function.
+    """
     signal.signal(signal.SIGALRM, timeout_handler)
     signal.alarm(timeout)
     try:
@@ -42,14 +54,30 @@ def run_with_timeout(func, chat_history, prompt, timeout):
     except TimeoutException as e:
         raise e
     finally:
-        signal.alarm(0)  # Cancel the alarm
+        signal.alarm(0)
     return result
 
-
 def execute_prompt(*, chat_history, prompt, system_instruction, model, vertex_ai_max_attempts=10):
+    """Executes a prompt using the specified model.
+
+    This function provides a unified interface for interacting with various LLMs,
+    including those from OpenAI (GPT), Google (Gemini), Anthropic (Claude), and local Qwen models.
+    It handles API-specific authentication, request formatting, and error handling.
+
+    Args:
+        chat_history (list): The history of the conversation.
+        prompt (str): The user's prompt.
+        system_instruction (str): The system instruction for the model.
+        model (str): The name of the model to use.
+        vertex_ai_max_attempts (int, optional): The maximum number of attempts for Vertex AI models. Defaults to 10.
+
+    Returns:
+        str: The model's response.
+    """
     global pipeline
 
     def read_params(model_):
+        """Reads the parameters for the specified model."""
         global prev_model, api_key_params, parameters
         if prev_model != model_:
             with open(os.path.join(config_dir, 'api_keys.toml'), 'r') as params:
@@ -74,8 +102,6 @@ def execute_prompt(*, chat_history, prompt, system_instruction, model, vertex_ai
         _chat_history = list()
         _chat_history.append({"role": "system", "content": system_instruction})
         for ch in chat_history:
-            # if ch['role'] == "assistant":  # Conversion between GPT and GEMINI
-            #     ch['role'] = 'system'
             if 'content' not in ch:
                 ch['content'] = ch['text']
             _chat_history.append({"role": ch["role"], "content": ch["content"]})
@@ -83,11 +109,8 @@ def execute_prompt(*, chat_history, prompt, system_instruction, model, vertex_ai
         while True:
             try:
                 response = client.chat.completions.create(
-                    # instructions=system_instruction,
                     max_tokens=128,
                     model=model,
-                    # logprobs=True,
-                    # top_logprobs=3,
                     temperature=0,
                     messages=[*_chat_history]
                 )
@@ -99,11 +122,6 @@ def execute_prompt(*, chat_history, prompt, system_instruction, model, vertex_ai
         return res_dump['choices'][0]['message']['content']
 
     elif "Qwen" in model:
-        # # Aphrodite Engine
-        # openai_api_key = "EMPTY"
-        # openai_api_base = "http://localhost:2242/v1"
-
-        # vLLM
         openai_api_base = "http://localhost:8000/v1"
         openai_api_key = "token-abc123"
 
@@ -114,8 +132,6 @@ def execute_prompt(*, chat_history, prompt, system_instruction, model, vertex_ai
         _chat_history = list()
         _chat_history.append({"role": "system", "content": system_instruction})
         for ch in chat_history:
-            # if ch['role'] == "assistant":  # Conversion between GPT and GEMINI
-            #     ch['role'] = 'system'
             if 'content' not in ch:
                 ch['content'] = ch['text']
             _chat_history.append({"role": ch["role"], "content": ch["content"]})
@@ -123,11 +139,8 @@ def execute_prompt(*, chat_history, prompt, system_instruction, model, vertex_ai
         while True:
             try:
                 response = client.chat.completions.create(
-                    # instructions=system_instruction,
                     max_tokens=128,
                     model=model,
-                    # logprobs=True,
-                    # top_logprobs=3,
                     temperature=0,
                     messages=[*_chat_history],
                     extra_body={
@@ -140,8 +153,6 @@ def execute_prompt(*, chat_history, prompt, system_instruction, model, vertex_ai
                 time.sleep(20)
         res_dump = response.model_dump()
         return res_dump['choices'][0]['message']['content']
-
-
 
     elif "claude" in model:
         client = AnthropicVertex(region=api_key_params['vertex_ai']['location'],
@@ -156,8 +167,7 @@ def execute_prompt(*, chat_history, prompt, system_instruction, model, vertex_ai
 
         message = client.messages.create(
             max_tokens=512,
-            # system=system_instruction,
-            messages=[{"role": "user", "content": "Hello, Claude!"}],  # <-- user prompt
+            messages=[{"role": "user", "content": "Hello, Claude!"}],
             model=model,
         )
         return message
@@ -171,10 +181,6 @@ def execute_prompt(*, chat_history, prompt, system_instruction, model, vertex_ai
                                            generation_config=parameters['parameters'])
             return responses_
 
-        # TODO(developer): Update and un-comment below line
-        # project_id = "PROJECT_ID"
-
-        # chat_history =
         model = GenerativeModel(model_name=model,
                                 system_instruction=system_instruction)
         safety_settings = {
@@ -182,13 +188,11 @@ def execute_prompt(*, chat_history, prompt, system_instruction, model, vertex_ai
             generative_models.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: generative_models.HarmBlockThreshold.BLOCK_NONE,
             generative_models.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: generative_models.HarmBlockThreshold.BLOCK_NONE,
             generative_models.HarmCategory.HARM_CATEGORY_HARASSMENT: generative_models.HarmBlockThreshold.BLOCK_NONE}
-        # generation_config = {"max_output_tokens": 128}
-        # model._system_config = "Count the tokens:"
-        # attempts = 10
+
         for attempt in range(vertex_ai_max_attempts):
             _chat_history = list()
             for ch in chat_history:
-                if ch['role'] == "assistant":  # Conversion between GPT and GEMINI
+                if ch['role'] == "assistant":
                     ch['role'] = 'model'
                 if 'content' not in ch:
                     ch['content'] = ch['text']
@@ -199,9 +203,6 @@ def execute_prompt(*, chat_history, prompt, system_instruction, model, vertex_ai
                 print(e)
             try:
                 responses = run_with_timeout(run, chat_history=_chat_history, prompt=prompt, timeout=30)
-                # chat = model.start_chat(history=_chat_history, response_validation=False)
-                # responses = chat.send_message(prompt, stream=False, safety_settings=safety_settings,
-                #                               generation_config=generation_config)
             except google_exceptions.InvalidArgument as e:
                 print(e)
                 break
@@ -219,7 +220,6 @@ def execute_prompt(*, chat_history, prompt, system_instruction, model, vertex_ai
             res = responses.to_dict()['candidates'][0]
             if res['finish_reason'] == 'MAX_TOKENS':
                 print(responses.text)
-                # raise RuntimeError(f"Max tokens reached: {res['finish_reason']}. Set longer output.")
                 return "[]"
             elif res['finish_reason'] == 'OTHER':
                 time.sleep(25)
@@ -228,13 +228,12 @@ def execute_prompt(*, chat_history, prompt, system_instruction, model, vertex_ai
         else:
             warnings.warn("Exceeded times of attempts")
             return "[]"
-        # print(responses.text)
         try:
             return responses.text
         except ValueError:
             raise Exception(responses.text)
         
-    else: # HuggingFace
+    else:
         _chat_history = list()
         _chat_history.append({"role": "system", "content": system_instruction})
         for ch in chat_history:
@@ -248,30 +247,20 @@ def execute_prompt(*, chat_history, prompt, system_instruction, model, vertex_ai
         task="text-generation",
         model=model,
         model_kwargs={"torch_dtype": torch.bfloat16},
-        device_map="auto", # cuda
+        device_map="auto",
         framework="pt"
     )
         
     outputs = pipeline(
         _chat_history,
         temperature=0.0001,
-        max_new_tokens=128,  # todo, check me
+        max_new_tokens=128,
         do_sample=True
      )
     
     return outputs[0]["generated_text"][-1]['content']
 
-    # raise RuntimeError(f"Unknown model: {model}")
-    # else:
-    #     raise RuntimeError(f"Unknown model: {model}")
-        # for chunk in responses:
-        #     print(chunk)
-        #     text_response.append(chunk.text)
-        # print("".join(text_response))
-
-
 if __name__ == '__main__':
-    # ch_0 = {'role': 'user', 'text': 'You Count apples.'}
     system_instruction = "You count the apples and print an integer. Only that, please."
     ch_1 = {'role': 'user', 'text': 'You know that George has one apple.'}
     ch_2 = {'role': 'model', 'text': 'George has one apple.'}

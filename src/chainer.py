@@ -2,12 +2,24 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src import *
-
 import itertools
 
-
 def chainer(text, domain="restaurant", model="gpt-4-turbo"):
-    AspectBasedSentimentPrompts.model = model  # Set model 4 all
+    """Processes a given text through a series of chained aspect-based sentiment analysis steps.
+
+    This function dynamically creates different processing chains by permuting the order of aspect,
+    sentiment, and category extraction. For each permutation, it processes the input text sequentially,
+    with each step feeding its output to the next.
+
+    Args:
+        text (str): The input text to analyze.
+        domain (str, optional): The domain of the text (e.g., "restaurant", "laptop"). Defaults to "restaurant".
+        model (str, optional): The language model to use for the analysis. Defaults to "gpt-4-turbo".
+
+    Yields:
+        tuple: A tuple containing the final output of the chain and the sequence of agents used.
+    """
+    AspectBasedSentimentPrompts.model = model
     AspectBasedSentimentPrompts.domain = domain
 
     a = Aspects
@@ -15,12 +27,9 @@ def chainer(text, domain="restaurant", model="gpt-4-turbo"):
     c = Categories
     r = Relations
 
-    # Generate all possible permutations of the list
-    # permutations_4 = list(itertools.permutations([a, s, c, r]))
     permutations_3 = list(itertools.permutations([a, s, c]))
-    # permutations_2 = list(itertools.permutations([a, s]))
-    permutations = permutations_3  #  permutations_4 + permutations_3 + permutations_2  # 
-    # permutations = [[r, s, a, c]]
+    permutations = permutations_3
+
     for perm in permutations:
         seq = "_".join([cl().__class__.__name__ for cl in perm])
         print(seq)
@@ -44,7 +53,6 @@ def chainer(text, domain="restaurant", model="gpt-4-turbo"):
             continue
         out = run_icl(p3.message_history, model=model)
         yield out, seq
-
 
 if __name__ == '__main__':
     text = "Try the lobster teriyaki and the rose special roll."

@@ -31,6 +31,10 @@ The system is designed to be model-agnostic, supporting various Large Language M
 │   ├── models.py                 # Unified interface for interacting with different LLMs
 │   ├── elements.py               # Defines the components of the CoT chain (Aspects, Sentiments, Categories)
 │   └── ...
+├── src_aux/
+│   ├── dataset_statistics.py     # Calculates statistics about the datasets
+│   ├── eval_asqp.py              # Evaluates the performance of the models
+│   ├── extract_categories.py     # Extracts categories from the datasets
 ├── requirements.txt            # Python dependencies
 └── README.md                   # This file
 ```
