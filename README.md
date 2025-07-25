@@ -59,6 +59,16 @@ The system is designed to be model-agnostic, supporting various Large Language M
     *   Rename `config/api_keys.toml.template` to `config/api_keys.toml`.
     *   Open `config/api_keys.toml` and fill in your API keys for the services you want to use (e.g., OpenAI, Google Vertex AI).
 
+## APIs and Local Models
+
+This project leverages the following APIs and libraries for interacting with LLMs:
+
+*   **OpenAI API:** Used for accessing GPT models. You can find instructions on how to get set up with the OpenAI API in their official [documentation](https://platform.openai.com/docs/overview).
+
+*   **Google Vertex AI:** Used for accessing Gemini and other Google models. For more information on how to get started with Vertex AI, please refer to the [Vertex AI documentation](https://cloud.google.com/vertex-ai/docs).
+
+*   **vLLM:** Used for running local models like Qwen. To learn how to set up and use vLLM, please see the [vLLM documentation](https://vllm.ai/).
+
 ## Running the Experiments
 
 The main entry points for running the experiments are the `src/main_*.py` files. You can run the experiments for a specific model by executing the corresponding script:
