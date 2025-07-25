@@ -1,0 +1,15 @@
+categories = [
+     "restaurant general",
+    "food quality",
+    "food prices",
+    "drinks style_options",
+    "restaurant prices",
+    "food style_options",
+    "drinks prices",
+    "restaurant miscellaneous",
+    "service general",
+    "ambience general",
+    "location general",
+    "drinks quality",
+    "food general",
+]

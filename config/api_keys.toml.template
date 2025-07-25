@@ -1,0 +1,9 @@
+# This is a template for the API keys configuration file.
+# Rename this file to 'api_keys.toml' and fill in your actual API keys.
+
+[vertex_ai]
+project = "your-google-cloud-project-id"
+location = "your-google-cloud-location"  # e.g., us-central1
+
+[open_ai]
+api_key = "your-openai-api-key"

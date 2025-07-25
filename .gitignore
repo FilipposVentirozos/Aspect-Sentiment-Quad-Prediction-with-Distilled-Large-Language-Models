@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# IDEs
+.idea/
+.vscode/
+
+# Data
+data/processed/
+data/intermediate/
+
+# Logs
+*.log
+logs/
+
+# Config
+config/api_keys.toml
+
+# OS-specific
+.DS_Store
+Thumbs.db
