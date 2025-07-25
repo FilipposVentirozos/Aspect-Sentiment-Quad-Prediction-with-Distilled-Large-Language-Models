@@ -44,8 +44,8 @@ The system is designed to be model-agnostic, supporting various Large Language M
 1.  **Clone the repository:**
 
     ```bash
-    git clone https://github.com/your-username/your-repo-name.git
-    cd your-repo-name
+    git clone https://github.com/FilipposVentirozos/Aspect-Sentiment-Quad-Prediction-with-Distilled-Large-Language-Models.git
+    cd Aspect-Sentiment-Quad-Prediction-with-Distilled-Large-Language-Models
     ```
 
 2.  **Install dependencies:**
@@ -88,10 +88,5 @@ You can customize the experiments by modifying the main block in each of these f
 If you use this code in your research, please cite our paper:
 
 ```
-@inproceedings{your-name-ranlp-2025,
-    title = {Aspect-Sentiment Quad Prediction with Distilled Large Language Models},
-    author = {Your Name(s)},
-    booktitle = {Proceedings of the International Conference on Recent Advances in Natural Language Processing (RANLP 2025)},
-    year = {2025}
-}
+TBD
 ```
